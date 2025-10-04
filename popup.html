@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCA4G</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="diff2html.min.css" />
+</head>
+<body class="w-[500px] h-[550px] text-base bg-white">
+
+    <!-- APIキー入力ビュー -->
+    <div id="api-key-view" class="p-6 hidden">
+        <h1 class="text-xl font-bold">GCA4G へようこそ</h1>
+        <p class="text-sm text-gray-600 my-4">利用を開始するには、Gemini APIキーを設定してください。</p>
+        <label for="api-key-input" class="block text-sm font-medium mb-1 text-gray-700">Gemini API Key</label>
+        <input type="password" id="api-key-input" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="AIzaSy...">
+        <button id="save-api-key-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">キーを保存して開始</button>
+    </div>
+
+    <!-- チャットビュー -->
+    <div id="chat-view" class="hidden h-full flex flex-col">
+        <header class="flex justify-between items-center p-4 border-b">
+            <h1 class="text-lg font-bold">GCA4G</h1>
+            <button id="change-api-key-btn" class="text-xs text-blue-600 hover:underline">APIキーを再設定</button>
+        </header>
+        
+        <div id="chat-log" class="flex-grow p-4 overflow-y-auto">
+            <!-- チャットメッセージが動的に追加される -->
+        </div>
+
+        <div id="error" role="alert" class="hidden mx-4 mb-2 p-4 text-sm text-red-600 bg-red-100 border border-red-400 rounded-md" aria-live="polite"></div>
+
+        <footer class="p-4 border-t">
+            <div class="flex items-center space-x-2">
+                <textarea id="prompt-textarea" class="w-full flex-grow p-2 border border-gray-300 rounded-md resize-none" placeholder="コードの修正内容を指示..." aria-label="プロンプト入力" rows="1"></textarea>
+                <button id="send-btn" class="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 disabled:bg-blue-400" aria-label="送信">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 差分表示用のライブラリスクリプト -->
+    <script src="diff.min.js"></script>
+    <script src="diff2html.min.js"></script>
+    <!-- この拡張機能のメインロジック -->
+    <script src="popup.js"></script>
+</body>
+</html>
