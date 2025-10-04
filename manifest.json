@@ -39,6 +39,16 @@
     "128": "images/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com/ https://play.google.com;"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "diff.min.js",
+        "diff2html.min.css",
+        "images/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
