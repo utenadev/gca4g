@@ -15,14 +15,30 @@
         <p class="text-sm text-gray-600 my-4">利用を開始するには、Gemini APIキーを設定してください。</p>
         <label for="api-key-input" class="block text-sm font-medium mb-1 text-gray-700">Gemini API Key</label>
         <input type="password" id="api-key-input" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="AIzaSy...">
-        <button id="save-api-key-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">キーを保存して開始</button>
+        <button id="save-api-key-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">次へ</button>
+    </div>
+
+    <!-- マスターパスワード入力ビュー -->
+    <div id="password-view" class="p-6 hidden">
+        <h1 class="text-xl font-bold">マスターパスワード設定</h1>
+        <p class="text-sm text-gray-600 my-4">APIキーを暗号化して保存するために、マスターパスワードを設定してください。</p>
+        <label for="master-password-input" class="block text-sm font-medium mb-1 text-gray-700">マスターパスワード</label>
+        <input type="password" id="master-password-input" class="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder="マスターパスワードを入力">
+        <label for="confirm-password-input" class="block text-sm font-medium mb-1 text-gray-700">確認用</label>
+        <input type="password" id="confirm-password-input" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="再入力">
+        <button id="save-password-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">パスワードを設定して開始</button>
+        <button id="back-to-api-key-btn" class="w-full mt-2 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400">戻る</button>
     </div>
 
     <!-- チャットビュー -->
     <div id="chat-view" class="hidden h-full flex flex-col">
         <header class="flex justify-between items-center p-4 border-b">
             <h1 class="text-lg font-bold">GCA4G</h1>
-            <button id="change-api-key-btn" class="text-xs text-blue-600 hover:underline">APIキーを再設定</button>
+            <div class="flex space-x-2">
+                <button id="pull-project-btn" class="text-xs text-green-600 hover:underline">プル</button>
+                <button id="push-project-btn" class="text-xs text-blue-600 hover:underline">プッシュ</button>
+                <button id="change-api-key-btn" class="text-xs text-blue-600 hover:underline">APIキーを再設定</button>
+            </div>
         </header>
         
         <div id="chat-log" class="flex-grow p-4 overflow-y-auto">

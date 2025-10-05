@@ -10,10 +10,17 @@ class Gca4gPopup {
     getElements() {
         return {
             apiKeyView: document.getElementById('api-key-view'),
+            passwordView: document.getElementById('password-view'),
             chatView: document.getElementById('chat-view'),
             apiKeyInput: document.getElementById('api-key-input'),
+            masterPasswordInput: document.getElementById('master-password-input'),
+            confirmPasswordInput: document.getElementById('confirm-password-input'),
             saveApiKeyButton: document.getElementById('save-api-key-btn'),
+            savePasswordButton: document.getElementById('save-password-btn'),
+            backToApiKeyButton: document.getElementById('back-to-api-key-btn'),
             changeApiKeyButton: document.getElementById('change-api-key-btn'),
+            pullProjectButton: document.getElementById('pull-project-btn'),
+            pushProjectButton: document.getElementById('push-project-btn'),
             chatLog: document.getElementById('chat-log'),
             errorDiv: document.getElementById('error'),
             promptTextarea: document.getElementById('prompt-textarea'),
@@ -46,7 +53,11 @@ class Gca4gPopup {
 
     addEventListeners() {
         this.elements.saveApiKeyButton.addEventListener('click', () => this.saveApiKey());
+        this.elements.savePasswordButton.addEventListener('click', () => this.saveMasterPassword());
+        this.elements.backToApiKeyButton.addEventListener('click', () => this.showView('apiKey'));
         this.elements.changeApiKeyButton.addEventListener('click', () => this.showView('apiKey'));
+        this.elements.pullProjectButton.addEventListener('click', () => this.handlePullProject());
+        this.elements.pushProjectButton.addEventListener('click', () => this.handlePushProject());
         this.elements.sendButton.addEventListener('click', () => this.handleSend());
         this.elements.promptTextarea.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -110,7 +121,7 @@ class Gca4gPopup {
     }
 
     showView(viewName) {
-        ['apiKeyView', 'chatView'].forEach(id => {
+        ['apiKeyView', 'passwordView', 'chatView'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('hidden');
         });
@@ -158,7 +169,60 @@ class Gca4gPopup {
     }
 
     async saveApiKey() {
+        // APIキーの入力を取得
         const apiKey = this.elements.apiKeyInput.value.trim();
+        // 簡易的なAPIキーの形式チェック
+        if (!apiKey.startsWith('AIzaSy')) {
+            this.showError('無効な形式のAPIキーです。');
+            return;
+        }
+
+        // マスターパスワードが設定されているか確認
+        const response = await this.sendMessageToSw({ type: 'GET_MASTER_PASSWORD_STATUS' });
+        if (response && response.hasPassword) {
+            // パスワードが設定されていれば、直接保存
+            await this.saveApiKeyInternal(apiKey);
+        } else {
+            // パスワードが未設定であれば、パスワード設定画面を表示
+            // APIキーは一時的に保持 (例: インスタンス変数に)
+            this.pendingApiKey = apiKey;
+            this.showView('password');
+        }
+    }
+
+    // マスターパスワードを保存する処理
+    async saveMasterPassword() {
+        const password = this.elements.masterPasswordInput.value.trim();
+        const confirmPassword = this.elements.confirmPasswordInput.value.trim();
+
+        if (password !== confirmPassword) {
+            this.showError('パスワードが一致しません。');
+            return;
+        }
+
+        if (password.length < 8) {
+            this.showError('パスワードは8文字以上で入力してください。');
+            return;
+        }
+
+        const response = await this.sendMessageToSw({ type: 'SET_MASTER_PASSWORD', password });
+        if (response && response.success) {
+            // マスターパスワード設定成功後、APIキーを保存
+            if (this.pendingApiKey) {
+                await this.saveApiKeyInternal(this.pendingApiKey);
+                // 保存後に一時変数をクリア
+                delete this.pendingApiKey;
+            } else {
+                // エラー: APIキーが見つからない
+                this.showError('APIキーが見つかりません。');
+            }
+        } else {
+            this.showError(response?.error || 'パスワードの設定に失敗しました。');
+        }
+    }
+
+    // APIキーをService Workerに送信して保存する処理 (内部用)
+    async saveApiKeyInternal(apiKey) {
         const response = await this.sendMessageToSw({ type: 'SAVE_API_KEY', apiKey });
         if (response && response.success) {
             this.showView('chat');
@@ -223,6 +287,87 @@ class Gca4gPopup {
             this.elements.errorDiv.classList.add('hidden');
         }
     }
+
+    // --- clasp 関連の処理 ---
+    async handlePullProject() {
+        console.log('Clasp: Pull button clicked');
+        this.elements.pullProjectButton.disabled = true;
+        try {
+            const response = await this.sendMessageToSw({ type: 'PULL_PROJECT' });
+            if (response && response.success) {
+                // プルしたファイル数をチャットログに表示
+                const fileCount = response.files ? response.files.length : 0;
+                this.renderMessage({ id: Date.now().toString(), role: 'assistant', text: `プル成功: ${fileCount} 個のファイルを取得しました。`, timestamp: Date.now() });
+            } else {
+                throw new Error(response?.error || 'プルに失敗しました。');
+            }
+        } catch (e) {
+            this.showError(e.message);
+        } finally {
+            this.elements.pullProjectButton.disabled = false;
+        }
+    }
+
+    async handlePushProject() {
+        console.log('Clasp: Push button clicked');
+        this.elements.pushProjectButton.disabled = true;
+        try {
+            // 最新のオリジナルファイルと差分データを取得
+            // 最後にGeminiからの応答を受け取ったメッセージを取得 (diffData と originalFiles を持つ)
+            const lastGeminiResponse = [...this.chatHistory].reverse().find(m => m.role === 'assistant' && m.diffData && m.originalFiles);
+            if (!lastGeminiResponse) {
+                throw new Error('プッシュするファイルデータが見つかりません。まずメッセージを送信してコードを生成してください。');
+            }
+
+            // originalFiles と diffData をマージして、最終的なファイルセットを構築
+            // diffData には updates が含まれ、{file: "name", content: "new_content"} の配列
+            const originalFiles = lastGeminiResponse.originalFiles;
+            const updates = lastGeminiResponse.diffData.updates;
+
+            // originalFiles をコピーし、updates の内容で上書き
+            const finalFiles = originalFiles.map(originalFile => {
+                const update = updates.find(u => u.file === originalFile.name);
+                if (update) {
+                    // ファイル名が一致する場合は、更新された内容に置き換える
+                    return {
+                        name: originalFile.name,
+                        type: originalFile.type,
+                        source: update.content
+                    };
+                }
+                // 一致しない場合は、元の内容を保持
+                return originalFile;
+            });
+
+            // 新規ファイル (originalFilesにないがupdatesにあるもの) を追加
+            updates.forEach(update => {
+                const existingFile = originalFiles.find(f => f.name === update.file);
+                if (!existingFile) {
+                    // GASのファイルタイプは 'server_js' または 'html' に決まっているため、拡張子から推定
+                    const type = update.file.endsWith('.html') ? 'html' : 'server_js';
+                    finalFiles.push({
+                        name: update.file,
+                        type: type,
+                        source: update.content
+                    });
+                }
+            });
+
+            console.log('Clasp: Pushing files:', finalFiles);
+
+            const response = await this.sendMessageToSw({ type: 'PUSH_PROJECT', files: finalFiles });
+            if (response && response.success) {
+                this.renderMessage({ id: Date.now().toString(), role: 'assistant', text: 'プッシュ成功: ファイルをGASプロジェクトにアップロードしました。', timestamp: Date.now() });
+            } else {
+                throw new Error(response?.error || 'プッシュに失敗しました。');
+            }
+        } catch (e) {
+            this.showError(e.message);
+        } finally {
+            this.elements.pushProjectButton.disabled = false;
+        }
+    }
+    // --- ここまで ---
 }
 
 new Gca4gPopup();

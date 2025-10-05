@@ -1,0 +1,14 @@
+{
+  "name": "gca4g",
+  "version": "1.0.0",
+  "description": "Gemini Code Assist for GAS Chrome Extension",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "@jest/globals": "^29.0.0"
+  }
+}
