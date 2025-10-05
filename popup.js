@@ -19,6 +19,7 @@ class Gca4gPopup {
             savePasswordButton: document.getElementById('save-password-btn'),
             backToApiKeyButton: document.getElementById('back-to-api-key-btn'),
             changeApiKeyButton: document.getElementById('change-api-key-btn'),
+            authenticateGasButton: document.getElementById('authenticate-gas-btn'),
             pullProjectButton: document.getElementById('pull-project-btn'),
             pushProjectButton: document.getElementById('push-project-btn'),
             chatLog: document.getElementById('chat-log'),
@@ -56,6 +57,7 @@ class Gca4gPopup {
         this.elements.savePasswordButton.addEventListener('click', () => this.saveMasterPassword());
         this.elements.backToApiKeyButton.addEventListener('click', () => this.showView('apiKey'));
         this.elements.changeApiKeyButton.addEventListener('click', () => this.showView('apiKey'));
+        this.elements.authenticateGasButton.addEventListener('click', () => this.handleAuthenticateGAS());
         this.elements.pullProjectButton.addEventListener('click', () => this.handlePullProject());
         this.elements.pushProjectButton.addEventListener('click', () => this.handlePushProject());
         this.elements.sendButton.addEventListener('click', () => this.handleSend());
@@ -365,6 +367,25 @@ class Gca4gPopup {
             this.showError(e.message);
         } finally {
             this.elements.pushProjectButton.disabled = false;
+        }
+    }
+    // --- ここまで ---
+
+    // --- GAS認証 関連の処理 ---
+    async handleAuthenticateGAS() {
+        console.log('Clasp: Authenticate GAS button clicked');
+        this.elements.authenticateGasButton.disabled = true;
+        try {
+            const response = await this.sendMessageToSw({ type: 'AUTHENTICATE_GAS' });
+            if (response && response.success) {
+                this.renderMessage({ id: Date.now().toString(), role: 'assistant', text: 'GAS認証に成功しました。', timestamp: Date.now() });
+            } else {
+                throw new Error(response?.error || 'GAS認証に失敗しました。');
+            }
+        } catch (e) {
+            this.showError(e.message);
+        } finally {
+            this.elements.authenticateGasButton.disabled = false;
         }
     }
     // --- ここまで ---

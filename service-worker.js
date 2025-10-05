@@ -294,6 +294,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case 'GET_MASTER_PASSWORD_STATUS':
           // 現在のマスターパスワードが設定されているかを返す
           return { hasPassword: !!masterPassword };
+        case 'AUTHENTICATE_GAS':
+          // chrome.identity を使用してアクセストークンを取得
+          try {
+            // getAuthToken はコールバック形式なので、Promiseでラップ
+            const token = await new Promise((resolve, reject) => {
+              chrome.identity.getAuthToken({ interactive: true }, (token) => {
+                if (chrome.runtime.lastError) {
+                  console.error('GCA4G: Error getting access token:', chrome.runtime.lastError);
+                  reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                  console.log('GCA4G: Access token acquired via chrome.identity.');
+                  resolve(token);
+                }
+              });
+            });
+
+            // 取得したアクセストークンをClaspクラス経由で保存
+            const claspAuth = new Clasp(chrome.storage.local);
+            await claspAuth.saveCredentials({ accessToken: token });
+            return { success: true };
+          } catch (error) {
+            console.error('GCA4G: Failed to authenticate GAS:', error);
+            return { success: false, error: error.message };
+          }
         // --- ここまで ---
         default:
           return { success: false, error: '不明なメッセージタイプです。' };
