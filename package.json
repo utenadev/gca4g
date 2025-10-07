@@ -10,5 +10,8 @@
   "devDependencies": {
     "jest": "^29.0.0",
     "@jest/globals": "^29.0.0"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.0"
   }
 }

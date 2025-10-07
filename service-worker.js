@@ -319,6 +319,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return { success: false, error: error.message };
           }
         // --- ここまで ---
+        case 'RESET_ALL_DATA':
+          // APIキーを削除
+          await chrome.storage.local.remove('apiKey');
+          // マスターパスワードをリセット
+          masterPassword = null;
+          // Clasp認証情報をリセット (nullを保存することで削除と見なす)
+          const claspReset = new Clasp(chrome.storage.local);
+          await claspReset.saveCredentials(null);
+          // プロジェクト設定をリセット (nullを保存することで削除と見なす)
+          await claspReset.saveProjectSettings(null);
+          console.log('GCA4G: All data (API Key, Master Password, Clasp Credentials, Project Settings) have been reset.');
+          return { success: true };
         default:
           return { success: false, error: '不明なメッセージタイプです。' };
       }

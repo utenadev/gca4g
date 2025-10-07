@@ -31,13 +31,14 @@
     </div>
 
     <!-- チャットビュー -->
-    <div id="chat-view" class="hidden h-full flex flex-col">
+    <div id="chat-view" class="h-full flex flex-col">
         <header class="flex justify-between items-center p-4 border-b">
             <h1 class="text-lg font-bold">GCA4G</h1>
             <div class="flex space-x-2">
                 <button id="pull-project-btn" class="text-xs text-green-600 hover:underline">プル</button>
                 <button id="push-project-btn" class="text-xs text-blue-600 hover:underline">プッシュ</button>
                 <button id="authenticate-gas-btn" class="text-xs text-purple-600 hover:underline">GAS認証</button>
+                <button id="reset-all-data-btn" class="text-xs text-red-600 hover:underline">全データリセット</button>
                 <button id="change-api-key-btn" class="text-xs text-blue-600 hover:underline">APIキーを再設定</button>
             </div>
         </header>
@@ -62,6 +63,6 @@
     <script src="diff.min.js"></script>
     <script src="diff2html.min.js"></script>
     <!-- この拡張機能のメインロジック -->
-    <script src="popup.js"></script>
+    <script type="module" src="popup.js"></script>
 </body>
 </html>

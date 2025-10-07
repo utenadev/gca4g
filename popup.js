@@ -26,6 +26,7 @@ class Gca4gPopup {
             errorDiv: document.getElementById('error'),
             promptTextarea: document.getElementById('prompt-textarea'),
             sendButton: document.getElementById('send-btn'),
+            resetAllDataButton: document.getElementById('reset-all-data-btn'),
         };
     }
 
@@ -61,6 +62,7 @@ class Gca4gPopup {
         this.elements.pullProjectButton.addEventListener('click', () => this.handlePullProject());
         this.elements.pushProjectButton.addEventListener('click', () => this.handlePushProject());
         this.elements.sendButton.addEventListener('click', () => this.handleSend());
+        this.elements.resetAllDataButton.addEventListener('click', () => this.handleResetAllData());
         this.elements.promptTextarea.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -386,6 +388,28 @@ class Gca4gPopup {
             this.showError(e.message);
         } finally {
             this.elements.authenticateGasButton.disabled = false;
+        }
+    }
+
+    async handleResetAllData() {
+        const confirmed = window.confirm('すべてのデータ (APIキー、マスターパスワード、Clasp認証情報、プロジェクト設定) をリセットしてもよろしいですか？');
+        if (confirmed) {
+            console.log('Resetting all data...');
+            const response = await this.sendMessageToSw({ type: 'RESET_ALL_DATA' });
+            if (response && response.success) {
+                // チャット履歴をクリア
+                this.chatHistory = [];
+                await this.saveChatHistory(); // session storage を更新
+                this.elements.chatLog.innerHTML = ''; // 表示上のログを消去
+
+                // APIキー入力画面に切り替え
+                this.showView('apiKey');
+                
+                // 共通のメッセージ表示エリアにリセット完了を通知
+                this.showError('すべてのデータがリセットされました。');
+            } else {
+                this.showError(response?.error || 'データのリセットに失敗しました。');
+            }
         }
     }
     // --- ここまで ---
