@@ -42,14 +42,23 @@ class Gca4gPopup {
     }
 
     async initialize() {
+        console.log('Gca4gPopup: initialize() called');
         this.addEventListeners();
         await this.loadChatHistory();
-        const response = await this.sendMessageToSw({ type: 'GET_API_KEY' });
-        const apiKey = response ? response.apiKey : null;
-        if (apiKey && apiKey.startsWith('AIzaSy')) {
-            this.showView('chat');
-        } else {
-            this.showView('apiKey');
+        console.log('Gca4gPopup: loadChatHistory() completed');
+        try {
+            const response = await this.sendMessageToSw({ type: 'GET_API_KEY' });
+            console.log('Gca4gPopup: GET_API_KEY response received:', response);
+            const apiKey = response ? response.apiKey : null;
+            if (apiKey && apiKey.startsWith('AIzaSy')) {
+                console.log('Gca4gPopup: API key found, showing chat view');
+                this.showView('chat');
+            } else {
+                console.log('Gca4gPopup: API key not found or invalid, showing api key view');
+                this.showView('apiKey');
+            }
+        } catch (error) {
+            console.error('Gca4gPopup: Error in initialize:', error);
         }
     }
 
@@ -103,8 +112,11 @@ class Gca4gPopup {
     }
 
     async sendMessageToSw(message) {
+        console.log('Gca4gPopup: Sending message to SW:', message);
         try {
-            return await chrome.runtime.sendMessage(message);
+            const response = await chrome.runtime.sendMessage(message);
+            console.log('Gca4gPopup: Message response received:', response);
+            return response;
         } catch (error) {
             console.error('Service Worker connection error:', error);
             this.showError('拡張機能のバックグラウンドと通信できません。');
