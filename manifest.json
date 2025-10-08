@@ -14,7 +14,7 @@
     "https://script.googleapis.com/"
   ],
   "oauth2": {
-    "client_id": "YOUR_GOOGLE_API_CLIENT_ID", // NOTE: Replace with your actual client ID from Google Cloud Console
+    "client_id": "YOUR_GOOGLE_API_CLIENT_ID",
     "scopes": [
       "https://www.googleapis.com/auth/script.projects"
     ]

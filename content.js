@@ -2,15 +2,6 @@
 
 console.log('GCA4G Content Script loaded.');
 
-const getGASFiles = async () => {
-  console.log('GCA4G: 実際のファイル取得ロジックは未実装です。シミュレーションデータを返します。');
-  // NOTE: This is a simulation. Real implementation requires complex DOM parsing.
-  return [
-    { name: 'Code.gs', content: `function myFunction() {\n  // 実際のファイルが見つかりませんでした\n  Logger.log('Hello from Code.gs');\n}` },
-    { name: 'Utils.js', content: `/**\n * 共通関数（シミュレーション）\n */\nfunction utilityFunction() {\n  return 'This is a utility.';\n}` }
-  ];
-};
-
 // GASのスクリプトIDをURLから取得する関数 (例: https://script.google.com/d/{scriptId}/edit)
 const getScriptIdFromUrl = () => {
   const path = window.location.pathname;

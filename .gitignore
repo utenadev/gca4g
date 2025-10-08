@@ -3,3 +3,6 @@ node_modules/
 my/
 chrome_debug_profile/
 images/
+dist/
+public/diff*.min.*
+public/diff2html*.min.*

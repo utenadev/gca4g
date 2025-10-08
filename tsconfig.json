@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
+  },
+  "include": [
+    "*.ts",
+    "vite.config.ts",
+    "clasp/*.js", // JSファイルも型チェック対象にする (JSDocから)
+    "node_modules/vite-plugin-web-extension/client.d.ts" // プラグインの型定義を追加
+  ],
+  "exclude": ["node_modules", "dist"]
+}

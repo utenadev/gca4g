@@ -1,0 +1,72 @@
+# GCA4G 拡張機能のモジュール関連性と処理フロー
+
+# モジュール
+"popup.html" -> "popup.js": UI ファイル
+"popup.js": ポップアップ制御
+"service-worker.js": バックグラウンド処理、API通信、データ保存
+"content.js": GASエディタとの連携（未実装部分）
+"diff_window.html" -> "diff_window.js": 差分表示UI
+clasp["Clasp.js"]: GASプッシュ/プル処理
+
+# ファイル
+"popup.html": HTML UI
+"style.css": スタイル
+"diff2html.min.css": diff表示CSS
+"diff.min.js": diffアルゴリズム
+"diff2html.min.js": diff UI表示
+
+# UIビュー
+APIView: APIキー入力画面 (api-key-view)
+PasswordView: マスターパスワード入力画面 (password-view)
+ChatView: チャット画面 (chat-view)
+
+# フロー: APIキー設定
+sequence {
+  note: ポップアップが開く
+  popup.js -> service-worker.js: GET_API_KEY
+  service-worker.js -> storage: chrome.storage.local.get('apiKey')
+  storage -> service-worker.js: null or encryptedApiKey
+  service-worker.js -> popup.js: apiKey (or null)
+  popup.js -> APIView: apiKeyが無効なら表示
+  note2: APIキー入力 & 保存
+  popup.js -> service-worker.js: SAVE_API_KEY
+  service-worker.js -> popup.js: success or error
+  popup.js -> ChatView: APIキーが有効なら表示
+}
+
+# フロー: チャット送信
+sequence2 {
+  note: ユーザーがチャット入力 & 送信
+  ChatView -> popup.js: prompt入力
+  popup.js -> content.js: REQUEST_FILES (GASエディタのコード取得)
+  content.js -> popup.js: originalFiles
+  popup.js -> service-worker.js: GENERATE_CODE
+  service-worker.js -> Gemini API: API呼び出し
+  Gemini API -> service-worker.js: 修正コード(JSON)
+  service-worker.js -> popup.js: diffデータ
+  popup.js -> ChatView: メッセージ表示 + 差分ボタン
+  note2: 差分表示
+  ChatView -> popup.js: diffボタンクリック
+  popup.js -> storage: tempDiffData 保存
+  popup.js -> diff_window.html: 新しいウィンドウで開く
+  diff_window.html -> diff_window.js: diff表示
+}
+
+# フロー: プッシュ/プル
+sequence3 {
+  note: ユーザーがプッシュ/プルボタンクリック
+  ChatView -> popup.js: ボタンクリック
+  popup.js -> service-worker.js: PULL_PROJECT / PUSH_PROJECT
+  service-worker.js -> clasp: Claspクラス経由でGAS通信
+  clasp -> service-worker.js: 成功/失敗
+  service-worker.js -> popup.js: 結果
+  popup.js -> ChatView: メッセージ表示
+}
+
+# 関係
+popup.js -> APIView
+popup.js -> PasswordView
+popup.js -> ChatView
+popup.js -> service-worker.js: メッセージング
+popup.js -> diff_window.js: 差分ウィンドウ
+service-worker.js -> clasp
