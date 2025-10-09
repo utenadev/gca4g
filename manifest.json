@@ -53,6 +53,7 @@
     {
       "resources": [
         "diff.min.js",
+        "diff2html.min.js",
         "diff2html.min.css",
         "images/*"
       ],

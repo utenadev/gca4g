@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>変更内容の確認 - GCA4G</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="diff2html.min.css" />
+</head>
+<body class="scrollable-window">
+    <div class="diff-window-container">
+        <main id="diff-container" class="diff-main-content no-header">
+            <div id="loading" class="p-4 text-center text-gray-500">
+                差分を読み込んでいます...
+            </div>
+        </main>
+        <footer class="diff-footer">
+            <button id="close-btn" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300">閉じる</button>
+            <button id="apply-btn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">エディタに反映</button>
+        </footer>
+    </div>
+    <script type="module" src="diff_window.js"></script>
+</body>
+</html>

@@ -6,3 +6,4 @@ images/
 dist/
 public/diff*.min.*
 public/diff2html*.min.*
+QWEN.md
